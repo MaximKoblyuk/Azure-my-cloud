@@ -11,10 +11,8 @@ on:
 
 env:
   TERRAFORM_VERSION: '1.6.0'
-  ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-  ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-  ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-  ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+  ARM_USE_CLI: "false"
+  ARM_USE_OIDC: "false"
 
 jobs:
   terraform-plan:
@@ -24,6 +22,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Azure Login with Service Principal
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -36,19 +39,12 @@ jobs:
           ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-          ARM_USE_CLI: false
-          ARM_USE_OIDC: false
         run: |
           terraform init \
             -backend-config="resource_group_name=rg-terraform-state" \
             -backend-config="storage_account_name=tfstateaccount" \
             -backend-config="container_name=tfstate" \
-            -backend-config="key=terraform.tfstate" \
-            -backend-config="subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" \
-            -backend-config="tenant_id=${{ secrets.ARM_TENANT_ID }}" \
-            -backend-config="client_id=${{ secrets.ARM_CLIENT_ID }}" \
-            -backend-config="client_secret=${{ secrets.ARM_CLIENT_SECRET }}" \
-            -backend-config="use_oidc=false"
+            -backend-config="key=terraform.tfstate"
 
       - name: Terraform Format Check
         run: terraform fmt -check
@@ -58,6 +54,11 @@ jobs:
         run: terraform validate
 
       - name: Terraform Plan
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
         run: terraform plan -out=tfplan
 
       - name: Upload Plan
@@ -79,6 +80,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Azure Login with Service Principal
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
@@ -90,19 +96,12 @@ jobs:
           ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-          ARM_USE_CLI: false
-          ARM_USE_OIDC: false
         run: |
           terraform init \
             -backend-config="resource_group_name=rg-terraform-state" \
             -backend-config="storage_account_name=tfstateaccount" \
             -backend-config="container_name=tfstate" \
-            -backend-config="key=terraform.tfstate" \
-            -backend-config="subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" \
-            -backend-config="tenant_id=${{ secrets.ARM_TENANT_ID }}" \
-            -backend-config="client_id=${{ secrets.ARM_CLIENT_ID }}" \
-            -backend-config="client_secret=${{ secrets.ARM_CLIENT_SECRET }}" \
-            -backend-config="use_oidc=false"
+            -backend-config="key=terraform.tfstate"
 
       - name: Download Plan
         uses: actions/download-artifact@v4
@@ -110,4 +109,9 @@ jobs:
           name: terraform-plan
 
       - name: Terraform Apply
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
         run: terraform apply -auto-approve tfplan
