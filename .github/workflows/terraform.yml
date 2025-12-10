@@ -36,7 +36,8 @@ jobs:
             -backend-config="resource_group_name=rg-terraform-state" \
             -backend-config="storage_account_name=tfstateaccount" \
             -backend-config="container_name=tfstate" \
-            -backend-config="key=terraform.tfstate"
+            -backend-config="key=terraform.tfstate" \
+            -backend-config="use_azuread_auth=true"
 
       - name: Terraform Format Check
         run: terraform fmt -check
@@ -78,7 +79,8 @@ jobs:
             -backend-config="resource_group_name=rg-terraform-state" \
             -backend-config="storage_account_name=tfstateaccount" \
             -backend-config="container_name=tfstate" \
-            -backend-config="key=terraform.tfstate"
+            -backend-config="key=terraform.tfstate" \
+            -backend-config="use_azuread_auth=true"
 
       - name: Download Plan
         uses: actions/download-artifact@v4
