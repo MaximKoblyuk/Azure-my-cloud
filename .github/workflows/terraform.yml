@@ -37,7 +37,11 @@ jobs:
             -backend-config="storage_account_name=tfstateaccount" \
             -backend-config="container_name=tfstate" \
             -backend-config="key=terraform.tfstate" \
-            -backend-config="use_azuread_auth=true"
+            -backend-config="use_azuread_auth=true" \
+            -backend-config="subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" \
+            -backend-config="tenant_id=${{ secrets.ARM_TENANT_ID }}" \
+            -backend-config="client_id=${{ secrets.ARM_CLIENT_ID }}" \
+            -backend-config="client_secret=${{ secrets.ARM_CLIENT_SECRET }}"
 
       - name: Terraform Format Check
         run: terraform fmt -check
@@ -80,7 +84,11 @@ jobs:
             -backend-config="storage_account_name=tfstateaccount" \
             -backend-config="container_name=tfstate" \
             -backend-config="key=terraform.tfstate" \
-            -backend-config="use_azuread_auth=true"
+            -backend-config="use_azuread_auth=true" \
+            -backend-config="subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" \
+            -backend-config="tenant_id=${{ secrets.ARM_TENANT_ID }}" \
+            -backend-config="client_id=${{ secrets.ARM_CLIENT_ID }}" \
+            -backend-config="client_secret=${{ secrets.ARM_CLIENT_SECRET }}"
 
       - name: Download Plan
         uses: actions/download-artifact@v4
