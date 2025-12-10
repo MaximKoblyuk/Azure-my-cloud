@@ -1,7 +1,7 @@
 trigger: none
 
 pool:
-  name: 'Default'  # or your agent pool name
+  vmImage: ubuntu-latest
 
 variables:
   - group: libery_secrets_group
